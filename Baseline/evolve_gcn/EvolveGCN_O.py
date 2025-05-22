@@ -51,7 +51,7 @@ class EvolveGCN_O(nn.Module):
         else:
             return [self.decoder(output) for output in output_list]
     
-    def casual_training_loss(self, adj_est_list, gnd_list, alpha, theta):
+    def causal_training_loss(self, adj_est_list, gnd_list, alpha, theta):
         loss = 0.0
         win_size = len(adj_est_list)
         for i in range(win_size):

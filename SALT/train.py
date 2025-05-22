@@ -61,7 +61,7 @@ def train():
         
         adj_est_list = net(sup_list,feat_list,noise_list,pred_flag=False)
 
-        loss = net.casual_training_loss(adj_est_list,
+        loss = net.causal_training_loss(adj_est_list,
                                         gnd_list,
                                         params.Loss['alpha'],
                                         params.Loss['theta'])

@@ -175,7 +175,7 @@ class DiagonalS6SSM(nn.Module):
                 # xs[j] = xs[j] + xsr[j]
         return [self.mlp(xs[-1])]
     
-    def casual_training_loss(self, adj_est, gnd_list, max_thres, alpha, beta, theta):
+    def causal_training_loss(self, adj_est, gnd_list, max_thres, alpha, beta, theta):
 
         loss = 0.0
         win_size = len(gnd_list)

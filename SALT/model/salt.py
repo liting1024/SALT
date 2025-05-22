@@ -94,7 +94,7 @@ class SALT(nn.Module):
             return tlssm_outputs
 
 
-    def casual_training_loss(self, adj_est_list, gnd_list,alpha,theta):
+    def causal_training_loss(self, adj_est_list, gnd_list,alpha,theta):
         mae_loss = mae(adj_est_list, gnd_list, theta, alpha)
         mse_loss = mse(adj_est_list, gnd_list, theta, alpha)
         loss = mae_loss + mse_loss

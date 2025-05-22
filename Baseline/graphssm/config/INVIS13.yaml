@@ -1,0 +1,24 @@
+data_name: "INVIS13"
+model: "Baseline.graphssm.GraphSSM.DiagonalS6SSM"
+is_baseline: True
+
+optimizer: "RMSprop"
+learning_rate: 5e-4
+dropout_rate: 0.0
+
+num_pre_epochs: 30
+num_epochs: 300
+win_size: 10
+pred_size: 1
+
+
+resume_last: False
+
+Loss:
+  name: "mae_and_mse"
+  alpha: 10
+  theta: 0.1
+
+enc_dims:
+  - 5
+  - 100

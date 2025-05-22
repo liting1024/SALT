@@ -1,0 +1,39 @@
+data_name: "T-Drive"
+model: "model.salt.SALT"
+
+optimizer: "RMSprop"
+learning_rate: 5e-4
+dropout_rate: 0.0
+
+num_pre_epochs: 30
+num_epochs: 300
+win_size: 5
+pred_size: 1
+
+
+resume_last: False
+
+Loss:
+  name: "mae_and_mse"
+  alpha: 40
+  theta: 0.1
+
+feat_proj_dims:
+  - 256
+  - 128 
+  - 128
+
+WLE:
+  model_class: "model.modules.wle"
+  in_channels: 640
+  hidden_channels: 640
+  out_channels: 1
+
+TLSSM:
+  model_class: "model.modules.tlssm"
+  d_model: 1
+  d_ssm: 1
+  headdim: 1
+  d_state: 4
+  d_conv: 2
+  rmsnorm: False

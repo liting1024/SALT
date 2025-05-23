@@ -55,7 +55,7 @@ struc_dims = [noise_dim, 128, 256] # Layer configuration of structural encoder
 temp_dims = [num_nodes*struc_dims[-1], 256] # Layer configuration of temporal encoder
 dec_dims = [temp_dims[-1], num_nodes*num_nodes] # Layer configuration of decoder
 disc_dims = [num_nodes*num_nodes, 256, 128, 64, 1] # Layer configuration of discriminator
-win_size = 10 # Window size of historical snapshots
+win_size = 5 # Window size of historical snapshots
 alpha = 10 # Hyper-parameter to adjust the contribution of the MSE loss
 
 # ====================

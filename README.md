@@ -3,7 +3,7 @@
 <h3> Structure-Aware Link Modeling for Temporal Weighted Link Prediction </h3>
 </div>
 
-This repository provides the official implementation of **Give Me Some SALT** (*Structure-Aware Link Modeling for Temporal Weighted Link Prediction*), a novel framework designed to tackle the challenges of dynamic weighted link prediction, including long-tail distribution and short-term randomness.
+This repository provides the official implementation of **Give Me Some SALT**: Structure-Aware Link Modeling for Temporal Weighted Link Prediction, a novel framework designed to tackle the challenges of temporal weighted link prediction, including long-tail distribution and short-term randomness.
 
 Our codebase includes:
 - The full implementation of our proposed **SALT** model.

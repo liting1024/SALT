@@ -339,7 +339,7 @@ for epoch in range(num_epochs):
     writer.add_scalar(f'Test/MAE_mean', MAE_mean_test, epoch)
     writer.add_scalar(f'Test/MAE_std', MAE_std_test, epoch)
     
-    mrx_mean = RMSE_mean_test + MAE_mean_test
+    mrx_mean = RMSE_mean_val + MAE_mean_val
     if mrx_mean < val_max_rmse:
         val_max_rmse = mrx_mean
         save_model(gen_net, gen_opt, pt_dir, epoch, RMSE_mean_test, MAE_mean_test)

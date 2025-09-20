@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .layers import GraphNeuralNetwork
-from .layers import Attention
+from layers import GraphNeuralNetwork
+from layers import Attention
 
 class STGSN(nn.Module):
     '''

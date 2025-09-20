@@ -32,7 +32,7 @@ def get_pos_emb(pos, hid_dim):
 def load_topology(num_nodes, pos_dim):
     pos_embs = [get_pos_emb(p, pos_dim) for p in range(num_nodes)]
     pos_emb = np.concatenate(pos_embs, axis=0)
-    return torch.FloatTensor(pos_emb)
+    return torch.FloatTensor(pos_emb).cuda()
 
 
 def get_node_map(node_set):

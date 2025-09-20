@@ -1,14 +1,14 @@
 # Demonstration of STGSN
 import os
 import random
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import trange
 
 import torch
 import torch.optim as optim
-from STGSN.modules import *
-from STGSN.loss import *
-from Code.Python.model.utils import *
+from modules import *
+from loss import *
+from utils import *
 
 def setup_seed(seed):
     torch.manual_seed(seed)
@@ -92,11 +92,11 @@ os.makedirs(log_dir, exist_ok=True)
 os.makedirs(pt_dir, exist_ok=True)
 writer = SummaryWriter(log_dir)
 
-test_max_rmse = 1e+9
+val_max_rmse = 1e+9
+
 # ====================
 for epoch in range(num_epochs):
-    # ====================
-    # Pre-train the model
+    # ------------------------------ Train the model ----------------------------- #
     model.train()
     num_batch = int(np.ceil(num_train_snaps/batch_size))  # Number of batch
     total_loss = 0.0
@@ -231,15 +231,16 @@ for epoch in range(num_epochs):
         MAE_list.append(MAE)
 
     # ====================
-    RMSE_mean = np.mean(RMSE_list)
-    RMSE_std = np.std(RMSE_list, ddof=1)
-    MAE_mean = np.mean(MAE_list)
-    MAE_std = np.std(MAE_list, ddof=1)
-    print('Val #%d RMSE %f %f MAE %f %f' % (epoch, RMSE_mean, RMSE_std, MAE_mean, MAE_std))
-    writer.add_scalar(f'Val/RMSE_mean', RMSE_mean, epoch)
-    writer.add_scalar(f'Val/RMSE_std', RMSE_std, epoch)
-    writer.add_scalar(f'Val/MAE_mean', MAE_mean, epoch)
-    writer.add_scalar(f'Val/MAE_std', MAE_std, epoch)
+    RMSE_mean_val = np.mean(RMSE_list)
+    RMSE_std_val  = np.std(RMSE_list, ddof=1)
+    MAE_mean_val  = np.mean(MAE_list)
+    MAE_std_val  = np.std(MAE_list, ddof=1)
+    print('Val Epoch %d RMSE %f %f MAE %f %f' % (epoch, RMSE_mean_val , RMSE_std_val , MAE_mean_val , MAE_std_val))
+    writer.add_scalar(f'Val/RMSE_mean', RMSE_mean_val, epoch)
+    writer.add_scalar(f'Val/RMSE_std', RMSE_std_val, epoch)
+    writer.add_scalar(f'Val/MAE_mean', MAE_mean_val, epoch)
+    writer.add_scalar(f'Val/MAE_std', MAE_std_val, epoch)
+    
     # ====================
     # Test the model
     model.eval()
@@ -315,17 +316,17 @@ for epoch in range(num_epochs):
         MAE_list.append(MAE)
 
     # ====================
-    RMSE_mean = np.mean(RMSE_list)
-    RMSE_std = np.std(RMSE_list, ddof=1)
-    MAE_mean = np.mean(MAE_list)
-    MAE_std = np.std(MAE_list, ddof=1)
-    writer.add_scalar(f'Test/RMSE_mean', RMSE_mean, epoch)
-    writer.add_scalar(f'Test/RMSE_std', RMSE_std, epoch)
-    writer.add_scalar(f'Test/MAE_mean', MAE_mean, epoch)
-    writer.add_scalar(f'Test/MAE_std', MAE_std, epoch)
+    RMSE_mean_test = np.mean(RMSE_list)
+    RMSE_std_test = np.std(RMSE_list, ddof=1)
+    MAE_mean_test = np.mean(MAE_list)
+    MAE_std_test = np.std(MAE_list, ddof=1)
+    print('Test Epoch %d RMSE %f %f MAE %f %f' % (epoch, RMSE_mean_test, RMSE_std_test, MAE_mean_test, MAE_std_test))
+    writer.add_scalar(f'Test/RMSE_mean', RMSE_mean_test, epoch)
+    writer.add_scalar(f'Test/RMSE_std', RMSE_std_test, epoch)
+    writer.add_scalar(f'Test/MAE_mean', MAE_mean_test, epoch)
+    writer.add_scalar(f'Test/MAE_std', MAE_std_test, epoch)
     
-    mrx_mean = RMSE_mean + MAE_mean
-    if mrx_mean < test_max_rmse:
-        test_max_rmse = mrx_mean
-        save_model(model, opt, pt_dir, epoch, RMSE_mean, MAE_mean)
-
+    mrx_mean = RMSE_mean_val + MAE_mean_val
+    if mrx_mean < val_max_rmse:
+        val_max_rmse = mrx_mean
+        save_model(model, opt, pt_dir, epoch, RMSE_mean_test, MAE_mean_test)

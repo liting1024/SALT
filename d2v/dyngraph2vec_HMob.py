@@ -1,6 +1,6 @@
 import os
 import random
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import trange
 
 import torch
@@ -45,24 +45,24 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # ====================
-data_name = 'Thiers13'
-num_nodes = 329 # Number of nodes (Level-1 w/ fixed node set)
-num_snaps = 179 # Number of snapshots
-max_thres = 50 # Threshold for maximum edge weight
+data_name = 'HMob'
+num_nodes = 92 # Number of nodes (Level-1 w/ fixed node set)
+num_snaps = 500 # Number of snapshots
+max_thres = 250 # Threshold for maximum edge weight
 struc_dims = [num_nodes, 32] # Layer configuration of structural encoder (FC)
 temp_dims = [struc_dims[-1], 16, 16] # Layer configuration of temporal encoder (RNN)
 dec_dims = [temp_dims[-1], 32, num_nodes] # Layer configuration of decoder (FC)
-beta = 2.0 # Hyper-parameter of loss
+beta = 0.1 # Hyper-parameter of loss
 
 # ====================
 base_dataset_path = './Dataset'
 edge_seq = np.load(f'{base_dataset_path}/{data_name}/{data_name}_edge_seq.npy', allow_pickle=True)
-node_set_seq = np.load(f'{base_dataset_path}/{data_name}/{data_name}_node_seq.npy', allow_pickle=True)
+node_set_seq = None #np.load(f'{base_dataset_path}/{data_name}/{data_name}_node_seq.npy', allow_pickle=True)
 
 # ====================
 dropout_rate = 0.2 # Dropout rate
 epsilon = 1e-2 # Threshold of zero-refining
-win_size = 10 # Window size of historical snapshots
+win_size = 5 # Window size of historical snapshots
 batch_size = 1 # Batch size
 num_epochs = 300 # Number of training epochs
 num_val_snaps = 10 # Number of validation snapshots
@@ -71,8 +71,8 @@ num_train_snaps = num_snaps-num_test_snaps-num_val_snaps # Number of training sn
 
 # ====================
 # Define the model
-model_name = 'E_LSTM_D'
-model = E_LSTM_D(struc_dims, temp_dims, dec_dims, dropout_rate).to(device)
+model_name = 'D2V'
+model = dyngraph2vec(struc_dims, temp_dims, dec_dims, dropout_rate).to(device)
 # ==========
 # Define the optimizer
 opt = optim.Adam(model.parameters(), lr=1e-4, weight_decay=5e-4)
@@ -88,10 +88,9 @@ writer = SummaryWriter(log_dir)
 
 val_max_rmse = 1e+9
 
-
 # ====================
-for epoch in trange(num_epochs):
-    # Train the model
+for epoch in range(num_epochs):
+    # ------------------------------ Train the model ----------------------------- #
     model.train()
     num_batch = int(np.ceil(num_train_snaps/batch_size)) # Number of batch
     total_loss = 0.0
@@ -119,7 +118,7 @@ for epoch in trange(num_epochs):
             gnd_tnr = torch.FloatTensor(gnd_norm).to(device)
             # ==========
             adj_est = model(adj_list)
-            loss_ = get_E_LSTM_D_loss(adj_est, gnd_tnr, beta)
+            loss_ = get_d2v_loss(adj_est, gnd_tnr, beta)
             batch_loss = batch_loss + loss_
         # ==========
         # Update model parameter according to batch loss
@@ -131,7 +130,7 @@ for epoch in trange(num_epochs):
     writer.add_scalar(f'Train/Loss', total_loss, epoch)
 
     # ====================
-    # Validate the model
+    # ---------------------------- Validate the model ---------------------------- #
     model.eval()
     RMSE_list = []
     MAE_list = []
@@ -166,15 +165,7 @@ for epoch in trange(num_epochs):
         # Get ground-truth
         edges = edge_seq[tau]
         gnd = get_adj_wei(edges, num_nodes, max_thres)
-        # ====================
-        # Evaluate the quality of current prediction operation
-        node_set = node_set_seq[t]
-        node_map = get_node_map(node_set)
-        real_row = list(node_map.keys())
-        real_col = list(node_map.keys())
-        adj_est = adj_est[np.ix_(real_row, real_col)]
-        gnd = gnd[np.ix_(real_row, real_col)]
-        num_nodes_t = len(node_set)
+        num_nodes_t = num_nodes
         # ------------------------------------------------------------------------- #
         RMSE = get_RMSE(adj_est, gnd, num_nodes_t)
         MAE = get_MAE(adj_est, gnd, num_nodes_t)
@@ -192,7 +183,7 @@ for epoch in trange(num_epochs):
     writer.add_scalar(f'Val/MAE_std', MAE_std_val, epoch)
     
     # ====================
-    # Test the model
+    # ------------------------------ Test the model ------------------------------ #
     model.eval()
     RMSE_list = []
     MAE_list = []
@@ -227,15 +218,7 @@ for epoch in trange(num_epochs):
         # Get the ground-truth
         edges = edge_seq[tau]
         gnd = get_adj_wei(edges, num_nodes, max_thres)
-        # ====================
-        # Evaluate the quality of current prediction operation
-        node_set = node_set_seq[t]
-        node_map = get_node_map(node_set)
-        real_row = list(node_map.keys())
-        real_col = list(node_map.keys())
-        adj_est = adj_est[np.ix_(real_row, real_col)]
-        gnd = gnd[np.ix_(real_row, real_col)]
-        num_nodes_t = len(node_set)
+        num_nodes_t = num_nodes
         # ------------------------------------------------------------------------- #
         RMSE = get_RMSE(adj_est, gnd, num_nodes_t)
         MAE = get_MAE(adj_est, gnd, num_nodes_t)

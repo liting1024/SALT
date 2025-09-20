@@ -6,7 +6,7 @@ from tqdm import trange
 
 import torch
 import torch.optim as optim
-from .modules import *
+from modules import *
 from loss import *
 from utils import *
 
